@@ -110,5 +110,5 @@ jobs:
           if [ -n "$open" ]; then
             gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Failed again: $RUN"
           else
-            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label C-bug --label S-needs-triage --body "$RUN"
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --type Bug --label S-needs-triage --body "$RUN"
           fi
