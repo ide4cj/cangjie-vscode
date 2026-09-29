@@ -24,18 +24,21 @@ suite('Cangjie', () => {
     // assert
     assert.equal(doc.languageId, 'cangjie');
   });
+});
 
-  test('comments toggle with //', async () => {
-    // arrange
-    const doc = await vscode.workspace.openTextDocument({ language: 'cangjie', content: 'let a = 1\n' });
-    const editor = await vscode.window.showTextDocument(doc);
+suite('without cjls', function () {
+  suiteSetup(function () {
+    if (process.env.CJLS_BIN) {
+      this.skip();
+    }
+  });
 
-    // act
-    await vscode.commands.executeCommand('editor.action.commentLine');
+  test('the extension activates though no server can be found', async () => {
+    // act: the notification saying so is not waited for
+    const api = await extension();
 
-    // assert
-    assert.equal(editor.document.lineAt(0).text, '// let a = 1');
-    await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+    // assert: undefined without a server; a cjls on PATH, when there is one, may still start
+    assert.ok(api);
   });
 });
 

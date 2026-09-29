@@ -45,14 +45,16 @@ export async function deactivate(): Promise<void> {
 async function start(context: vscode.ExtensionContext): Promise<void> {
   const server = findServer(context);
   if (!server) {
+    output?.error('no cjls binary: cjls.server.path is unset, none ships in this VSIX, and none is on PATH');
+    // not awaited: activation would wait for the user to close the notification
     const open = 'Open settings';
-    const choice = await vscode.window.showErrorMessage(
-      'cjls: no language server found. Set `cjls.server.path`, or put `cjls` on PATH.',
-      open,
-    );
-    if (choice === open) {
-      await vscode.commands.executeCommand('workbench.action.openSettings', 'cjls.server.path');
-    }
+    void vscode.window
+      .showErrorMessage('cjls: no language server found. Set `cjls.server.path`, or put `cjls` on PATH.', open)
+      .then((choice) => {
+        if (choice === open) {
+          void vscode.commands.executeCommand('workbench.action.openSettings', 'cjls.server.path');
+        }
+      });
     return;
   }
   output?.info(`starting ${server.path} (${server.from})`);
