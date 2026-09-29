@@ -1,0 +1,114 @@
+name: CI
+
+# The extension against cjls (cjls's D32): the pinned release and the nightly — or cjls's build of
+# this branch's name when cjls has one — on VS Code stable, and the nightly on Insiders. Every day
+# too, when a failure opens an issue.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: "0 5 * * *" # after cjls's nightly
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    name: Conventional commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: cocogitto/cocogitto-action@v4
+        with:
+          command: check
+          args: ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
+      # a squash merge makes the title the commit on master, and `cog bump` reads that
+      - name: Check the PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: cog verify "$TITLE"
+
+  test:
+    name: Test (${{ matrix.os }}, cjls ${{ matrix.cjls }}, VS Code ${{ matrix.vscode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        cjls: [pin, nightly]
+        vscode: [stable]
+        include:
+          - os: ubuntu-latest
+            cjls: nightly
+            vscode: insiders
+    runs-on: ${{ matrix.os }}
+    # a hang fails the job in minutes; the tests take seconds
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: |
+          if [ "${{ matrix.cjls }}" = nightly ]; then cjls=nightly; else cjls=$(cat .cjls-version); fi
+          echo "cjls=$cjls" >> "$GITHUB_OUTPUT"
+        shell: bash
+      - id: cjls
+        uses: ide4cj/.github/actions/cjls@main
+        with:
+          version: ${{ steps.version.outputs.cjls }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: npm test
+        env:
+          CJLS_BIN: ${{ steps.cjls.outputs.path }}
+          VSCODE_VERSION: ${{ matrix.vscode }}
+        run: if [ "$RUNNER_OS" = Linux ]; then xvfb-run -a npm test; else npm test; fi
+        shell: bash
+
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vsce package --out cangjie.vsix
+      - run: unzip -l cangjie.vsix
+
+  # a red daily run is an issue, one at a time: the Monday triage starts from those
+  report:
+    name: Report the daily run
+    needs: [test, package]
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - run: |
+          title="The daily run against cjls nightly failed"
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Failed again: $RUN"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label C-bug --label S-needs-triage --body "$RUN"
+          fi

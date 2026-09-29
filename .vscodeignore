@@ -1,0 +1,11 @@
+**
+!dist/extension.js
+!server/**
+!syntaxes/**
+!language-configuration.json
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!LICENSE-MIT
+!LICENSE-APACHE

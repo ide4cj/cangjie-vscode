@@ -1,0 +1,50 @@
+name: Nightly
+
+# The pre-release channel (cjls's D32): every night cjls's nightly or this repository's master moved,
+# VSIXes with the nightly inside, versioned 0.<stable minor + 1>.<date> — an odd minor, above
+# every stable release until the next.
+on:
+  schedule:
+    - cron: "0 4 * * *" # an hour after cjls's nightly
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  decide:
+    name: Anything new
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.decide.outputs.version }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: decide
+        run: |
+          cjls=$(gh release view nightly --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish 2>/dev/null || true)
+          if [ -z "$cjls" ]; then echo "::notice::cjls has no nightly yet"; exit 0; fi
+          last=$(gh release view nightly --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null | sed -n 's/^key: //p')
+          if [ "$last" = "$cjls/$GITHUB_SHA" ]; then echo "::notice::nothing new since the last pre-release"; exit 0; fi
+          IFS=. read -r major minor _ < <(node -p 'require("./package.json").version')
+          echo "version=$major.$((minor + 1)).$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+  ci:
+    needs: decide
+    if: needs.decide.outputs.version
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      issues: write
+
+  release:
+    needs: [decide, ci]
+    if: needs.decide.outputs.version
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ needs.decide.outputs.version }}
+      channel: pre-release
+    secrets: inherit
+    permissions:
+      contents: write
