@@ -1,0 +1,110 @@
+name: Release
+
+# Platform VSIXes with cjls inside, and a universal one without it (the server from
+# `cjls.server.path` or PATH): stable, an even minor, with the pinned cjls; pre-release, an odd
+# minor, with the nightly (cjls's D32). Published to the Marketplace and Open VSX when their tokens
+# are set, and to this repository's releases always.
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      channel:
+        type: string # stable | pre-release
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The extension's version (an even minor for stable, odd for pre-release)
+        required: true
+      channel:
+        type: choice
+        options: [stable, pre-release]
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  vsix:
+    name: VSIX (${{ matrix.target }})
+    strategy:
+      matrix:
+        target: [darwin-arm64, linux-x64, win32-x64, universal]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.channel == 'stable' && format('v{0}', inputs.version) || '' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
+      - if: matrix.target != 'universal'
+        run: npm run fetch-cjls -- ${{ inputs.channel == 'stable' && 'pin' || 'nightly' }} ${{ matrix.target }}
+      - name: vsce package
+        run: |
+          args=(--out "cangjie-${{ matrix.target }}.vsix")
+          if [ "${{ matrix.target }}" != universal ]; then args+=(--target "${{ matrix.target }}"); fi
+          if [ "${{ inputs.channel }}" = pre-release ]; then args+=(--pre-release); fi
+          npx vsce package "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: cangjie-${{ matrix.target }}.vsix
+          if-no-files-found: error
+
+  publish:
+    name: Publish
+    needs: vsix
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+      CHANNEL: ${{ inputs.channel }}
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      PRE: ${{ inputs.channel == 'pre-release' && '--pre-release' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          path: dist
+          merge-multiple: true
+      - name: GitHub release
+        run: |
+          if [ "$CHANNEL" = stable ]; then
+            gh release create "v$VERSION" dist/*.vsix --title "v$VERSION" --verify-tag --notes "cjls $(cat .cjls-version) inside."
+          else
+            # the rolling pre-release, as cjls's nightly
+            # its last line is what nightly.yml compares, to publish only what changed
+            cjls=$(gh release view nightly --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish)
+            printf 'cjls nightly %s inside, the extension at %s.\n\nkey: %s/%s\n' "${cjls:0:12}" "${GITHUB_SHA:0:12}" "$cjls" "$GITHUB_SHA" > notes.md
+            gh release delete nightly --cleanup-tag --yes 2>/dev/null || true
+            gh release create nightly dist/*.vsix --prerelease --latest=false --target "$GITHUB_SHA" --title "nightly ($VERSION)" --notes-file notes.md
+          fi
+      - name: Marketplace
+        run: |
+          if [ -z "$VSCE_PAT" ]; then echo "::notice::no VSCE_PAT: not published to the Marketplace"; exit 0; fi
+          for vsix in dist/*.vsix; do
+            npx vsce publish --packagePath "$vsix" ${PRE:+"$PRE"} --pat "$VSCE_PAT"
+          done
+      - name: Open VSX
+        run: |
+          if [ -z "$OVSX_PAT" ]; then echo "::notice::no OVSX_PAT: not published to Open VSX"; exit 0; fi
+          for vsix in dist/*.vsix; do
+            npx ovsx publish --packagePath "$vsix" ${PRE:+"$PRE"} --pat "$OVSX_PAT"
+          done

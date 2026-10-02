@@ -1,0 +1,119 @@
+{
+  "name": "cangjie",
+  "displayName": "Cangjie",
+  "description": "Cangjie in VS Code: the cjls language server, highlighting, comments and brackets",
+  "version": "0.0.0",
+  "publisher": "ide4cj",
+  "license": "(MIT OR Apache-2.0)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ide4cj/cangjie-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/ide4cj/cangjie-vscode/issues"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "cangjie",
+    "cjls",
+    "lsp"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "workspaceContains:**/cjpm.toml"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "cangjie",
+        "aliases": [
+          "Cangjie",
+          "cangjie"
+        ],
+        "extensions": [
+          ".cj",
+          ".cj.macrocall"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "cangjie",
+        "scopeName": "source.cangjie",
+        "path": "./syntaxes/cangjie.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "cjls.restartServer",
+        "title": "Restart the language server",
+        "category": "cjls"
+      },
+      {
+        "command": "cjls.showOutput",
+        "title": "Show the language server's log",
+        "category": "cjls"
+      }
+    ],
+    "configuration": {
+      "title": "cjls",
+      "properties": {
+        "cjls.server.path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "scope": "machine-overridable",
+          "markdownDescription": "The `cjls` binary to run. Unset: the one this extension ships, else `cjls` on `PATH`."
+        },
+        "cjls.server.extraEnv": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "markdownDescription": "Environment variables for the server, such as `{ \"CJLS_LOG_LEVEL\": \"DEBUG\" }`."
+        },
+        "cjls.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the messages between VS Code and the server in its output channel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p . && node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "pretest": "npm run build",
+    "test": "vscode-test",
+    "fetch-cjls": "node scripts/fetch-cjls.mjs"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^10.1.2"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "~1.100.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "ovsx": "^1.2.0",
+    "typescript": "^5.9.0"
+  }
+}

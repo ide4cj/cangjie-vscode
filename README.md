@@ -48,7 +48,7 @@ npm run fetch-cjls -- nightly darwin-arm64 && npx vsce package --target darwin-a
 
 F5 in VS Code runs it in an Extension Development Host. A change the server has to make first is a
 branch of the same name here and in cjls, each CI testing the other's (cjls's D32,
-[CONTRIBUTING](https://github.com/ide4cj/.github/blob/main/CONTRIBUTING.md)).
+[CONTRIBUTING](https://github.com/ide4cj/.github/blob/master/CONTRIBUTING.md)).
 
 Releases: `bump.yml` once Renovate's PR moves `.cjls-version` (the stable channel), `nightly.yml`
 every night (the pre-release). Publishing needs the secrets `VSCE_PAT` (Marketplace, publisher
