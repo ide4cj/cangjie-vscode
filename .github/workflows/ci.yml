@@ -63,7 +63,7 @@ jobs:
           echo "cjls=$cjls" >> "$GITHUB_OUTPUT"
         shell: bash
       - id: cjls
-        uses: ide4cj/.github/actions/cjls@main
+        uses: ide4cj/.github/actions/cjls@master
         with:
           version: ${{ steps.version.outputs.cjls }}
       - uses: actions/setup-node@v4
