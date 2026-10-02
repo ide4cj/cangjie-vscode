@@ -2,7 +2,7 @@
   "name": "cangjie",
   "displayName": "Cangjie",
   "description": "Cangjie in VS Code: the cjls language server, highlighting, comments and brackets",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "publisher": "ide4cj",
   "license": "(MIT OR Apache-2.0)",
   "repository": {
