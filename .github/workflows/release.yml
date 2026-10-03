@@ -45,7 +45,7 @@ jobs:
       - run: npm ci
       - run: npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
       - if: matrix.target != 'universal'
-        run: npm run fetch-cjls -- ${{ inputs.channel == 'stable' && 'pin' || 'nightly' }} ${{ matrix.target }}
+        run: npm run fetch-cjls -- ${{ inputs.channel == 'stable' && 'pin' || 'nightly-build' }} ${{ matrix.target }}
       - name: vsce package
         run: |
           args=(--out "cangjie-${{ matrix.target }}.vsix")
@@ -89,7 +89,7 @@ jobs:
           if [ "$CHANNEL" = stable ]; then
             gh release create "v$VERSION" dist/*.vsix --title "v$VERSION" --verify-tag --notes "cjls $(cat .cjls-version) inside."
           else
-            # the rolling pre-release, as cjls's nightly (its `nightly-build`)
+            # the rolling pre-release, as cjls's nightly
             # its last line is what nightly.yml compares, to publish only what changed
             cjls=$(gh release view nightly-build --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish)
             printf 'cjls nightly %s inside, the extension at %s.\n\nkey: %s/%s\n' "${cjls:0:12}" "${GITHUB_SHA:0:12}" "$cjls" "$GITHUB_SHA" > notes.md

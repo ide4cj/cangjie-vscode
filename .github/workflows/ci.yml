@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: version
         run: |
-          if [ "${{ matrix.cjls }}" = nightly ]; then cjls=nightly; else cjls=$(cat .cjls-version); fi
+          if [ "${{ matrix.cjls }}" = nightly ]; then cjls=nightly-build; else cjls=$(cat .cjls-version); fi
           echo "cjls=$cjls" >> "$GITHUB_OUTPUT"
         shell: bash
       - id: cjls

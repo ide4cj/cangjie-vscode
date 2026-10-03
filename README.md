@@ -15,7 +15,7 @@ From the Marketplace or [Open VSX](https://open-vsx.org): **Cangjie** by `ide4cj
 | Channel | Version | cjls inside |
 |---|---|---|
 | release | even minor (`0.2.x`) | the release this version pins (`.cjls-version`), the one it is tested with |
-| pre-release | odd minor (`0.3.<date>`) | cjls's `nightly`, rebuilt every night master moves |
+| pre-release | odd minor (`0.3.<date>`) | cjls's `nightly-build`, rebuilt every night master moves |
 
 VS Code's **Switch to Pre-Release Version** picks the channel.
 
@@ -43,7 +43,7 @@ npm ci
 npm run build                      # tsc, then esbuild into dist/extension.js
 CJLS_BIN=/path/to/cjls npm test    # VS Code on test/fixture; the server's cases need CJLS_BIN
 VSCODE_VERSION=insiders npm test
-npm run fetch-cjls -- nightly darwin-arm64 && npx vsce package --target darwin-arm64
+npm run fetch-cjls -- nightly-build darwin-arm64 && npx vsce package --target darwin-arm64
 ```
 
 F5 in VS Code runs it in an Extension Development Host. A change the server has to make first is a
