@@ -1,6 +1,6 @@
 // The cjls binary a platform VSIX ships, into server/:
 //
-//   node scripts/fetch-cjls.mjs <tag | nightly | pin> <vscode target>
+//   node scripts/fetch-cjls.mjs <tag | pin> <vscode target>
 //
 // `pin` is the release in .cjls-version. The archive is the one cjls's release publishes for the
 // target, checked against the release's SHA256SUMS.
@@ -21,7 +21,7 @@ const TARGETS = {
 const [version, vscodeTarget] = process.argv.slice(2);
 const platform = TARGETS[vscodeTarget];
 if (!version || !platform) {
-  console.error(`usage: fetch-cjls.mjs <tag | nightly | pin> <${Object.keys(TARGETS).join(' | ')}>`);
+  console.error(`usage: fetch-cjls.mjs <tag | pin> <${Object.keys(TARGETS).join(' | ')}>`);
   process.exit(2);
 }
 const tag = version === 'pin' ? fs.readFileSync('.cjls-version', 'utf8').trim() : version;
