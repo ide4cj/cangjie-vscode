@@ -24,7 +24,9 @@ if (!version || !platform) {
   console.error(`usage: fetch-cjls.mjs <tag | nightly | pin> <${Object.keys(TARGETS).join(' | ')}>`);
   process.exit(2);
 }
-const tag = version === 'pin' ? fs.readFileSync('.cjls-version', 'utf8').trim() : version;
+// `nightly` is cjls's pre-release `nightly-build` (cjls's D38)
+const tag =
+  version === 'pin' ? fs.readFileSync('.cjls-version', 'utf8').trim() : version === 'nightly' ? 'nightly-build' : version;
 if (!tag) {
   console.error('.cjls-version pins no release yet');
   process.exit(1);

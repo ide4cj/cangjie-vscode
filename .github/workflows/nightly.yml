@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: decide
         run: |
-          cjls=$(gh release view nightly --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish 2>/dev/null || true)
+          cjls=$(gh release view nightly-build --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish 2>/dev/null || true)
           if [ -z "$cjls" ]; then echo "::notice::cjls has no nightly yet"; exit 0; fi
           last=$(gh release view nightly --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null | sed -n 's/^key: //p')
           if [ "$last" = "$cjls/$GITHUB_SHA" ]; then echo "::notice::nothing new since the last pre-release"; exit 0; fi

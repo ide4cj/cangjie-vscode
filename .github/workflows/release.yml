@@ -89,9 +89,9 @@ jobs:
           if [ "$CHANNEL" = stable ]; then
             gh release create "v$VERSION" dist/*.vsix --title "v$VERSION" --verify-tag --notes "cjls $(cat .cjls-version) inside."
           else
-            # the rolling pre-release, as cjls's nightly
+            # the rolling pre-release, as cjls's nightly (its `nightly-build`)
             # its last line is what nightly.yml compares, to publish only what changed
-            cjls=$(gh release view nightly --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish)
+            cjls=$(gh release view nightly-build --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish)
             printf 'cjls nightly %s inside, the extension at %s.\n\nkey: %s/%s\n' "${cjls:0:12}" "${GITHUB_SHA:0:12}" "$cjls" "$GITHUB_SHA" > notes.md
             gh release delete nightly --cleanup-tag --yes 2>/dev/null || true
             gh release create nightly dist/*.vsix --prerelease --latest=false --target "$GITHUB_SHA" --title "nightly ($VERSION)" --notes-file notes.md
