@@ -92,6 +92,21 @@ suite('cjls', function () {
     assert.ok(tokens && tokens.data.length > 0, 'some tokens');
   });
 
+  test('cjls answers the folding ranges of a file', async () => {
+    // arrange: `main` spans lines 2 to 5
+    await extension();
+    await vscode.window.showTextDocument(main);
+
+    // act
+    const ranges = await vscode.commands.executeCommand<vscode.FoldingRange[]>(
+      'vscode.executeFoldingRangeProvider',
+      main,
+    );
+
+    // assert
+    assert.ok(ranges?.some((r) => r.start === 2 && r.end === 5), JSON.stringify(ranges));
+  });
+
   test('a restart starts a new server', async () => {
     // arrange
     const api = await extension();
