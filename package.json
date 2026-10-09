@@ -98,7 +98,8 @@
     "vscode:prepublish": "npm run build",
     "build": "tsc -p . && node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
-    "pretest": "npm run build",
+    "pretest": "npm run build && npm run test:grammar",
+    "test:grammar": "vscode-tmgrammar-test \"test/grammar/*.cj\"",
     "test": "vscode-test",
     "fetch-cjls": "node scripts/fetch-cjls.mjs"
   },
@@ -114,6 +115,7 @@
     "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.28.2",
     "ovsx": "^1.2.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vscode-tmgrammar-test": "^0.1.3"
   }
 }

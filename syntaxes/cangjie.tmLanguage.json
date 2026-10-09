@@ -2,15 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Cangjie",
   "scopeName": "source.cangjie",
-  "comment": "What a file looks like before cjls answers its semantic tokens: comments, strings, numbers, keywords. The server colors the rest (cjls's D19).",
+  "comment": "What a file looks like before cjls answers its semantic tokens, and a hover's code, which gets none: comments, strings, numbers, keywords, declared names, parameters, a type by its capital. The server colors the rest of a file (cjls's D19).",
   "patterns": [
     { "include": "#comments" },
     { "include": "#strings" },
     { "include": "#numbers" },
     { "include": "#annotations" },
-    { "include": "#keywords" },
-    { "include": "#types" },
     { "include": "#declarations" },
+    { "include": "#keywords" },
+    { "include": "#parameters" },
+    { "include": "#types" },
     { "include": "#calls" },
     { "include": "#operators" }
   ],
@@ -76,7 +77,8 @@
     },
     "types": {
       "patterns": [
-        { "name": "support.type.primitive.cangjie", "match": "\\b(Int8|Int16|Int32|Int64|IntNative|UInt8|UInt16|UInt32|UInt64|UIntNative|Float16|Float32|Float64|Rune|Bool|Unit|Nothing|This|VArray)\\b" }
+        { "name": "support.type.primitive.cangjie", "match": "\\b(Int8|Int16|Int32|Int64|IntNative|UInt8|UInt16|UInt32|UInt64|UIntNative|Float16|Float32|Float64|Rune|Bool|Unit|Nothing|This|VArray)\\b" },
+        { "name": "entity.name.type.cangjie", "match": "\\b\\p{Lu}[\\p{L}\\p{N}_]*\\b" }
       ]
     },
     "declarations": {
@@ -88,6 +90,27 @@
         {
           "match": "\\b(func)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
           "captures": { "1": { "name": "storage.type.cangjie" }, "2": { "name": "entity.name.function.cangjie" } }
+        },
+        {
+          "match": "\\b(prop)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": { "1": { "name": "storage.type.cangjie" }, "2": { "name": "variable.other.property.cangjie" } }
+        },
+        {
+          "match": "\\b(const)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": { "1": { "name": "storage.type.cangjie" }, "2": { "name": "variable.other.constant.cangjie" } }
+        },
+        {
+          "match": "\\b(let|var)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": { "1": { "name": "storage.type.cangjie" }, "2": { "name": "variable.other.cangjie" } }
+        }
+      ]
+    },
+    "parameters": {
+      "comment": "A name before a type, `x: T` or `x!: T`, the `let` and `var` taken: a parameter, a named argument, a lambda's or a pattern's binding.",
+      "patterns": [
+        {
+          "match": "\\b([\\p{L}_][\\p{L}\\p{N}_]*)\\s*(!)?\\s*(?=:)",
+          "captures": { "1": { "name": "variable.parameter.cangjie" }, "2": { "name": "keyword.operator.cangjie" } }
         }
       ]
     },
@@ -98,7 +121,7 @@
     },
     "operators": {
       "patterns": [
-        { "name": "keyword.operator.cangjie", "match": "\\|>|~>|=>|->|<-|<:|\\?\\?|\\.\\.=?|[-+*/%&|^!<>=]=?|\\*\\*=?|&&|\\|\\||<<=?|>>=?" }
+        { "name": "keyword.operator.cangjie", "match": "\\|>|~>|=>|->|<-|<:|\\?\\?|\\.\\.=?|[-+*/%&|^!<>=]=?|\\*\\*=?|&&|\\|\\||<<=?|>>=?|\\?" }
       ]
     }
   }
