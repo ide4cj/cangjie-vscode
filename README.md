@@ -36,6 +36,18 @@ In this order:
 Commands: **cjls: Restart the language server**, **cjls: Show the language server's log**. A
 change to `cjls.server.*` restarts it.
 
+## The server's settings
+
+The other `cjls.*` settings are the server's own, such as `cjls.linkedProjects` (projects to load
+besides those found in the workspace) and `cjls.cangjieHome` (the Cangjie SDK): **Preferences: Open
+Settings** → *cjls* lists them with what they do. The extension passes the section `cjls` to the
+server as it starts, and a cjls that prints its settings' schema asks for it again whenever it
+changes, without a restart (cjls's [D79](https://github.com/ide4cj/cjls/blob/master/docs/adr/0079-settings-are-r1s.md)).
+
+They are generated into `package.json` from the schema the server prints, `cjls --config-schema`:
+`npm run settings -- /path/to/cjls` writes them, and CI fails while they are not those of the cjls
+`.cjls-version` pins. A setting of a newer cjls than the one running is left alone by it.
+
 ## Development
 
 ```sh
@@ -44,6 +56,7 @@ npm run build                      # tsc, then esbuild into dist/extension.js
 CJLS_BIN=/path/to/cjls npm test    # VS Code on test/fixture; the server's cases need CJLS_BIN
 VSCODE_VERSION=insiders npm test
 npm run fetch-cjls -- nightly-build darwin-arm64 && npx vsce package --target darwin-arm64
+npm run settings -- /path/to/cjls  # the server's settings into package.json, from its schema
 ```
 
 F5 in VS Code runs it in an Extension Development Host. A change the server has to make first is a

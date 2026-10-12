@@ -10,6 +10,17 @@ import type { Api } from '../extension';
 const fixture = vscode.workspace.workspaceFolders![0].uri;
 const main = vscode.Uri.joinPath(fixture, 'src', 'main.cj');
 
+/** Waits for `holds` to hold, however long: a hang is CI's to end (.vscode-test.mjs). */
+async function until<T>(holds: () => Promise<T | undefined>): Promise<T> {
+  for (;;) {
+    const value = await holds();
+    if (value !== undefined) {
+      return value;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
 async function extension(): Promise<Api> {
   const ext = vscode.extensions.getExtension<Api>('ide4cj.cangjie');
   assert.ok(ext, 'the extension is installed');
@@ -105,6 +116,33 @@ suite('cjls', function () {
 
     // assert
     assert.ok(ranges?.some((r) => r.start === 2 && r.end === 5), JSON.stringify(ranges));
+  });
+
+  test('a setting of the section cjls reaches cjls: the projects of cjls.linkedProjects are loaded', async () => {
+    // arrange: a directory outside the workspace, loaded only when linked
+    const linked = vscode.Uri.joinPath(fixture, '..', 'linked').fsPath;
+    const config = vscode.workspace.getConfiguration('cjls');
+    await config.update('linkedProjects', [linked], vscode.ConfigurationTarget.Global);
+    const api = await extension();
+
+    try {
+      // act: started again, cjls has it from `initializationOptions` (and, since it reads its
+      // settings, from `workspace/configuration` as well)
+      await api.restart();
+      const symbols = await until(async () => {
+        const found = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
+          'vscode.executeWorkspaceSymbolProvider',
+          'findLinked',
+        );
+        return found?.some((s) => s.name === 'findLinked') ? found : undefined;
+      });
+
+      // assert
+      const found = symbols.find((s) => s.name === 'findLinked')!;
+      assert.equal(path.resolve(found.location.uri.fsPath), path.resolve(linked, 'linked.cj'));
+    } finally {
+      await config.update('linkedProjects', undefined, vscode.ConfigurationTarget.Global);
+    }
   });
 
   test('a restart starts a new server', async () => {

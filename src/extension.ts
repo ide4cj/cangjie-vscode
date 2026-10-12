@@ -1,5 +1,6 @@
 // Cangjie in VS Code: a thin client of cjls (cjls's D15, D32). The server answers what LSP can;
-// this starts it, restarts it when its settings change, and gives it an output channel.
+// this starts it, restarts it when `cjls.server.*` changes, passes it the section `cjls` (cjls's
+// D79), and gives it an output channel.
 
 import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
@@ -69,6 +70,10 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
       { scheme: 'untitled', language: 'cangjie' },
     ],
     outputChannel: output,
+    // the section as it is at the start; afterwards the server asks for it (`workspace/configuration`)
+    // and registers for its changes, which vscode-languageclient answers and sends from the same
+    // section. Keys it does not know, such as `server`, it leaves alone.
+    initializationOptions: () => toJson(vscode.workspace.getConfiguration('cjls')),
   };
   const started = new LanguageClient('cjls', 'cjls', serverOptions, clientOptions);
   try {
@@ -86,4 +91,9 @@ async function stop(): Promise<void> {
   if (running) {
     await running.stop();
   }
+}
+
+/** A configuration as plain JSON: `WorkspaceConfiguration` carries its methods besides the values. */
+function toJson(config: vscode.WorkspaceConfiguration): unknown {
+  return JSON.parse(JSON.stringify(config));
 }
