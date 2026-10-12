@@ -54,7 +54,8 @@ function main(args) {
     console.log(`::notice::${cjls} prints no settings' schema: package.json is not checked against it`);
     return 0;
   }
-  const text = fs.readFileSync(PACKAGE, 'utf8');
+  // a checkout on Windows may have CRLF; what this writes has LF
+  const text = fs.readFileSync(PACKAGE, 'utf8').replace(/\r\n/g, '\n');
   const pkg = JSON.parse(text);
   const configuration = pkg.contributes.configuration;
   configuration.properties = withSettings(configuration.properties, schema);
