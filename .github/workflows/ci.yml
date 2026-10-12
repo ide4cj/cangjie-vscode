@@ -71,6 +71,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # the settings package.json declares for the server are those of the cjls it pins (cjls's D79)
+      - name: The server's settings
+        if: matrix.cjls == 'pin' && steps.cjls.outputs.path != ''
+        run: npm run settings -- --check "${{ steps.cjls.outputs.path }}"
+        shell: bash
       - name: npm test
         env:
           CJLS_BIN: ${{ steps.cjls.outputs.path }}
