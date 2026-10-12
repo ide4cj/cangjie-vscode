@@ -36,6 +36,19 @@ In this order:
 Commands: **cjls: Restart the language server**, **cjls: Show the language server's log**. A
 change to `cjls.server.*` restarts it.
 
+## Expand macro
+
+**Cangjie: Expand Macro**, on a macro call's head (`@`, its name, its attribute), shows what the
+call expands to in a read-only document beside the editor, as cjls's `cjls/expandMacro` answers it:
+the macro server's output for a macro of the workspace, cjls's own (signatures only) for one of std.
+The command is there once the server says it expands macros (`experimental.expandMacro`).
+
+The server's code action **Expand macro** writes the whole file expanded instead, as `cjc
+--debug-macro` does, into `.cjls/expanded/<path>.cj.macrocall` under the project's root, and opens
+it: hover and go to definition work there while it is what the server would write now (cjls's
+[D103](https://github.com/ide4cj/cjls/blob/master/docs/adr/0103-an-expansion-is-shown-as-a-request-and-as-a-read-only-file.md)).
+A `.cj.macrocall` file is Cangjie.
+
 ## The server's settings
 
 The other `cjls.*` settings are the server's own, such as `cjls.linkedProjects` (projects to load
