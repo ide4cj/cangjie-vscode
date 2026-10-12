@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.channel == 'stable' && format('v{0}', inputs.version) || '' }}
       - uses: actions/setup-node@v4
@@ -73,7 +73,7 @@ jobs:
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
       PRE: ${{ inputs.channel == 'pre-release' && '--pre-release' || '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22

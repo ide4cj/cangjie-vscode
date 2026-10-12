@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: decide
         run: |
           cjls=$(gh release view nightly-build --repo ide4cj/cjls --json targetCommitish --jq .targetCommitish 2>/dev/null || true)
