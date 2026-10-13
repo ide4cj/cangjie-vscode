@@ -88,8 +88,21 @@
         "command": "cjls.showOutput",
         "title": "Show the language server's log",
         "category": "cjls"
+      },
+      {
+        "command": "cjls.showMacroExpansion",
+        "title": "Expand Macro",
+        "category": "Cangjie"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "cjls.showMacroExpansion",
+          "when": "editorLangId == cangjie && cjls.expandsMacros"
+        }
+      ]
+    },
     "configuration": {
       "title": "cjls",
       "properties": {

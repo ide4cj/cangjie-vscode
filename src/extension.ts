@@ -1,9 +1,17 @@
 // Cangjie in VS Code: a thin client of cjls (cjls's D15, D32). The server answers what LSP can;
 // this starts it, restarts it when `cjls.server.*` changes, passes it the section `cjls` (cjls's
-// D79), and gives it an output channel.
+// D79), gives it an output channel, and shows what `cjls/expandMacro` answers (expandMacro.ts).
 
 import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import {
+  EXPANDS_MACROS,
+  ExpansionDocuments,
+  SCHEME,
+  SHOW_MACRO_EXPANSION,
+  expandsMacros,
+  showMacroExpansion,
+} from './expandMacro';
 import { findServer } from './server';
 
 /** What the extension returns from `activate`, for its tests. */
@@ -19,10 +27,16 @@ let output: vscode.LogOutputChannel | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<Api> {
   output = vscode.window.createOutputChannel('cjls', { log: true });
+  const expansions = new ExpansionDocuments();
   context.subscriptions.push(
     output,
+    expansions,
+    vscode.workspace.registerTextDocumentContentProvider(SCHEME, expansions),
     vscode.commands.registerCommand('cjls.restartServer', restart),
     vscode.commands.registerCommand('cjls.showOutput', () => output?.show()),
+    vscode.commands.registerCommand(SHOW_MACRO_EXPANSION, () =>
+      showMacroExpansion(client, expansions, vscode.window.activeTextEditor),
+    ),
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('cjls.server')) {
         void restart();
@@ -65,6 +79,8 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
     options: { env: { ...process.env, ...extraEnv } },
   };
   const clientOptions: LanguageClientOptions = {
+    // `*.cj.macrocall` is Cangjie too (package.json), so the expanded files the server writes
+    // (cjls's D103) are its documents; an expansion shown by `cjls.showMacroExpansion` is not
     documentSelector: [
       { scheme: 'file', language: 'cangjie' },
       { scheme: 'untitled', language: 'cangjie' },
@@ -79,6 +95,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
   try {
     await started.start();
     client = started;
+    await vscode.commands.executeCommand('setContext', EXPANDS_MACROS, expandsMacros(started));
   } catch (e) {
     output?.error(`cjls did not start: ${e}`);
     void vscode.window.showErrorMessage(`cjls did not start: ${e}`);
@@ -88,6 +105,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
 async function stop(): Promise<void> {
   const running = client;
   client = undefined;
+  await vscode.commands.executeCommand('setContext', EXPANDS_MACROS, false);
   if (running) {
     await running.stop();
   }
