@@ -31,7 +31,7 @@ jobs:
         run: echo "version=$(cat .cjls-version)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
       - uses: ide4cj/.github/actions/settings@master
         with:
           version: ${{ steps.pin.outputs.version }}
