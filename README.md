@@ -4,20 +4,25 @@
 server, shipped inside the extension; highlighting (the server's semantic tokens over a small
 TextMate grammar); `//` comments, brackets and indentation.
 
-> Another Cangjie extension (such as `IDE-Innovation-Lab.cangjie`) claims the same language: keep
-> one of them enabled per workspace, or both start a server on every file.
+> Another Cangjie extension (such as `IDE-Innovation-Lab.cangjie`, listed as **Cangjie**) claims the
+> same language: keep one of them enabled per workspace, or both start a server on every file. This
+> one is **Cangjie (cjls)** by `ide4cj`, `ide4cj.cangjie`.
 
 ## Install
 
-From the Marketplace or [Open VSX](https://open-vsx.org): **Cangjie** by `ide4cj`. Or a VSIX from
-[the releases](https://github.com/ide4cj/cangjie-vscode/releases): `code --install-extension cangjie-<platform>.vsix`.
+Not on the Marketplace or Open VSX yet ([#17](https://github.com/ide4cj/cangjie-vscode/issues/17)):
+a VSIX from [the releases](https://github.com/ide4cj/cangjie-vscode/releases), the one for your
+platform (`cangjie-darwin-arm64.vsix`, `cangjie-linux-x64.vsix`, `cangjie-win32-x64.vsix`) or
+`cangjie-universal.vsix` on any other, then **Extensions: Install from VSIX…** or
+`code --install-extension cangjie-<platform>.vsix`. A VSIX installed so does not update itself.
 
 | Channel | Version | cjls inside |
 |---|---|---|
 | release | even minor (`0.2.x`) | the release this version pins (`.cjls-version`), the one it is tested with |
 | pre-release | odd minor (`0.3.<date>`) | cjls's `nightly-build`, rebuilt every night master moves |
 
-VS Code's **Switch to Pre-Release Version** picks the channel.
+The latest release is the stable channel; the pre-release is the release `nightly`. Once the
+extension is listed, VS Code's **Switch to Pre-Release Version** picks the channel.
 
 ## The server binary
 
