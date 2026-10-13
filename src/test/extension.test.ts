@@ -256,7 +256,7 @@ suite('cjls', function () {
       this.skip();
     }
     await showAt(derive, onDerive);
-    const expanded = vscode.Uri.joinPath(fixture, '.cjls', 'expanded', 'src', 'derive.cj.macrocall');
+    const expanded = vscode.Uri.joinPath(fixture, '.cache', 'cjls', 'expanded', 'src', 'derive.cj.macrocall');
     const action = await until(async () => {
       const actions = await vscode.commands.executeCommand<(vscode.CodeAction | vscode.Command)[]>(
         'vscode.executeCodeActionProvider',
@@ -284,7 +284,7 @@ suite('cjls', function () {
       assert.match(editor.document.getText(), /\bextend\b/);
     } finally {
       await vscode.commands.executeCommand('workbench.action.closeAllEditors');
-      await vscode.workspace.fs.delete(vscode.Uri.joinPath(fixture, '.cjls'), { recursive: true });
+      await vscode.workspace.fs.delete(vscode.Uri.joinPath(fixture, '.cache', 'cjls', 'expanded'), { recursive: true });
     }
   });
 

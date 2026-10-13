@@ -44,8 +44,10 @@ the macro server's output for a macro of the workspace, cjls's own (signatures o
 The command is there once the server says it expands macros (`experimental.expandMacro`).
 
 The server's code action **Expand macro** writes the whole file expanded instead, as `cjc
---debug-macro` does, into `.cjls/expanded/<path>.cj.macrocall` under the project's root, and opens
-it: hover and go to definition work there while it is what the server would write now (cjls's
+--debug-macro` does, into `.cache/cjls/expanded/<path>.cj.macrocall` under its project (the cjpm
+workspace or `cj-project.json` the file is of; the user's cache if that cannot be written, cjls's
+[D106](https://github.com/ide4cj/cjls/blob/master/docs/adr/0106-the-servers-directory-is-the-projects-cache-cjls.md)),
+and opens it: hover and go to definition work there while it is what the server would write now (cjls's
 [D103](https://github.com/ide4cj/cjls/blob/master/docs/adr/0103-an-expansion-is-shown-as-a-request-and-as-a-read-only-file.md)).
 A `.cj.macrocall` file is Cangjie.
 
