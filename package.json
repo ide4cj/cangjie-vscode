@@ -49,6 +49,35 @@
         "path": "./syntaxes/cangjie.tmLanguage.json"
       }
     ],
+    "semanticTokenModifiers": [
+      {
+        "id": "constructor",
+        "description": "A constructor: an `init` or a primary constructor's name, on a `method`."
+      },
+      {
+        "id": "constant",
+        "description": "A `const`, on a `readonly` `variable`, which a `let` is as well."
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "cangjie",
+        "scopes": {
+          "method.constructor": [
+            "entity.name.function.cangjie"
+          ],
+          "variable.constant": [
+            "variable.other.constant.cangjie"
+          ],
+          "variable.defaultLibrary": [
+            "variable.language.cangjie"
+          ],
+          "type.defaultLibrary": [
+            "support.type.primitive.cangjie"
+          ]
+        }
+      }
+    ],
     "commands": [
       {
         "command": "cjls.restartServer",
