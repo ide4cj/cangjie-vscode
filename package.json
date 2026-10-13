@@ -71,7 +71,7 @@
           ],
           "default": null,
           "scope": "machine-overridable",
-          "markdownDescription": "The `cjls` binary to run. Unset: the one this extension ships, else `cjls` on `PATH`."
+          "markdownDescription": "TEST The `cjls` binary to run. Unset: the one this extension ships, else `cjls` on `PATH`."
         },
         "cjls.server.extraEnv": {
           "type": "object",
