@@ -87,7 +87,12 @@ jobs:
       - name: GitHub release
         run: |
           if [ "$CHANNEL" = stable ]; then
-            gh release create "v$VERSION" dist/*.vsix --title "v$VERSION" --verify-tag --notes "cjls $(cat .cjls-version) inside."
+            # a re-run of a release whose publishing failed finds it made
+            if gh release view "v$VERSION" >/dev/null 2>&1; then
+              gh release upload "v$VERSION" dist/*.vsix --clobber
+            else
+              gh release create "v$VERSION" dist/*.vsix --title "v$VERSION" --verify-tag --notes "cjls $(cat .cjls-version) inside."
+            fi
           else
             # the rolling pre-release, as cjls's nightly
             # its last line is what nightly.yml compares, to publish only what changed
@@ -96,15 +101,18 @@ jobs:
             gh release delete nightly --cleanup-tag --yes 2>/dev/null || true
             gh release create nightly dist/*.vsix --prerelease --latest=false --target "$GITHUB_SHA" --title "nightly ($VERSION)" --notes-file notes.md
           fi
+      # Each VSIX is a target of one version: the universal one serves the platforms with none of
+      # their own. --skip-duplicate: a re-run publishes what is missing. --pre-release makes vsce
+      # check the VSIX was packaged as one; ovsx reads that from the VSIX and ignores the flag.
       - name: Marketplace
         run: |
           if [ -z "$VSCE_PAT" ]; then echo "::notice::no VSCE_PAT: not published to the Marketplace"; exit 0; fi
           for vsix in dist/*.vsix; do
-            npx vsce publish --packagePath "$vsix" ${PRE:+"$PRE"} --pat "$VSCE_PAT"
+            npx vsce publish --packagePath "$vsix" ${PRE:+"$PRE"} --skip-duplicate --pat "$VSCE_PAT"
           done
       - name: Open VSX
         run: |
           if [ -z "$OVSX_PAT" ]; then echo "::notice::no OVSX_PAT: not published to Open VSX"; exit 0; fi
           for vsix in dist/*.vsix; do
-            npx ovsx publish --packagePath "$vsix" ${PRE:+"$PRE"} --pat "$OVSX_PAT"
+            npx ovsx publish --packagePath "$vsix" --skip-duplicate --pat "$OVSX_PAT"
           done
