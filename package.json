@@ -1,9 +1,14 @@
 {
   "name": "cangjie",
-  "displayName": "Cangjie",
+  "displayName": "Cangjie (cjls)",
   "description": "Cangjie in VS Code: the cjls language server, highlighting, comments and brackets",
   "version": "0.4.0",
   "publisher": "ide4cj",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#143d59",
+    "theme": "dark"
+  },
   "license": "(MIT OR Apache-2.0)",
   "repository": {
     "type": "git",
@@ -12,13 +17,19 @@
   "bugs": {
     "url": "https://github.com/ide4cj/cangjie-vscode/issues"
   },
+  "homepage": "https://github.com/ide4cj/cangjie-vscode#readme",
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Formatters"
   ],
   "keywords": [
     "cangjie",
+    "cj",
+    "cjpm",
     "cjls",
-    "lsp"
+    "lsp",
+    "language server",
+    "harmonyos"
   ],
   "engines": {
     "vscode": "^1.100.0"
