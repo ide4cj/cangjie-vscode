@@ -71,7 +71,7 @@
           ],
           "default": null,
           "scope": "machine-overridable",
-          "markdownDescription": "TEST The `cjls` binary to run. Unset: the one this extension ships, else `cjls` on `PATH`."
+          "markdownDescription": "The `cjls` binary to run. Unset: the one this extension ships, else `cjls` on `PATH`."
         },
         "cjls.server.extraEnv": {
           "type": "object",
@@ -97,7 +97,7 @@
             "type": "string"
           },
           "default": [],
-          "markdownDescription": "Projects to load, as rust-analyzer's: each an absolute path or a `file:` URI of a `cj-project.json`, or of a directory to find a project in. Under a root without a `cj-project.json`, they replace finding one there; outside every root, they are loaded besides."
+          "markdownDescription": "TEST Projects to load, as rust-analyzer's: each an absolute path or a `file:` URI of a `cj-project.json`, or of a directory to find a project in. Under a root without a `cj-project.json`, they replace finding one there; outside every root, they are loaded besides."
         },
         "cjls.cangjieHome": {
           "type": [
