@@ -97,7 +97,7 @@
             "type": "string"
           },
           "default": [],
-          "markdownDescription": "TEST Projects to load, as rust-analyzer's: each an absolute path or a `file:` URI of a `cj-project.json`, or of a directory to find a project in. Under a root without a `cj-project.json`, they replace finding one there; outside every root, they are loaded besides."
+          "markdownDescription": "Projects to load, as rust-analyzer's: each an absolute path or a `file:` URI of a `cj-project.json`, or of a directory to find a project in. Under a root without a `cj-project.json`, they replace finding one there; outside every root, they are loaded besides."
         },
         "cjls.cangjieHome": {
           "type": [
