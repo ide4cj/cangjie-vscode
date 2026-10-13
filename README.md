@@ -45,8 +45,9 @@ server as it starts, and a cjls that prints its settings' schema asks for it aga
 changes, without a restart (cjls's [D79](https://github.com/ide4cj/cjls/blob/master/docs/adr/0079-settings-are-r1s.md)).
 
 They are generated into `package.json` from the schema the server prints, `cjls --config-schema`:
-`npm run settings -- /path/to/cjls` writes them, and CI fails while they are not those of the cjls
-`.cjls-version` pins. A setting of a newer cjls than the one running is left alone by it.
+`npm run settings -- /path/to/cjls` writes them, and the PR that moves `.cjls-version` gets those
+of the cjls it pins as a commit of a bot's (cjls's D107). A setting of a newer cjls than the one
+running is left alone by it.
 
 ## Development
 
