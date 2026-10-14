@@ -78,13 +78,13 @@ suite('Cangjie', () => {
     }
   });
 
-  test('Cangjie: Expand Macro is in the palette of a Cangjie editor whose server expands macros', () => {
+  test('cjls: Expand macro is in the palette of a Cangjie editor whose server expands macros', () => {
     // act
     const contributes = vscode.extensions.getExtension('ide4cj.cangjie')!.packageJSON.contributes;
 
     // assert: not `cjls.expandMacro`, which is the server's command, registered from its capabilities
     const command = contributes.commands.find((c: { command: string }) => c.command === SHOW_MACRO_EXPANSION);
-    assert.deepEqual(command, { command: SHOW_MACRO_EXPANSION, title: 'Expand Macro', category: 'Cangjie' });
+    assert.deepEqual(command, { command: SHOW_MACRO_EXPANSION, title: 'Expand macro', category: 'cjls' });
     assert.ok(!contributes.commands.some((c: { command: string }) => c.command === 'cjls.expandMacro'));
     assert.deepEqual(contributes.menus.commandPalette, [
       { command: SHOW_MACRO_EXPANSION, when: 'editorLangId == cangjie && cjls.expandsMacros' },
