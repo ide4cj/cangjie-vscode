@@ -38,9 +38,11 @@ change to `cjls.server.*` restarts it.
 
 ## Expand macro
 
-**Cangjie: Expand Macro**, on a macro call's head (`@`, its name, its attribute), shows what the
-call expands to in a read-only document beside the editor, as cjls's `cjls/expandMacro` answers it:
-the macro server's output for a macro of the workspace, cjls's own (signatures only) for one of std.
+**cjls: Expand macro**, on a macro call's head (`@`, its name, its attribute) or anywhere in a
+declaration with calls on it, shows what the call (on a declaration, its outermost) expands to in a
+read-only document beside the editor, as cjls's `cjls/expandMacro` answers it: the macro server's
+output for a macro of the workspace, cjls's own (signatures only, after the declaration) for one of
+std.
 The command is there once the server says it expands macros (`experimental.expandMacro`).
 
 The server's code action **Expand macro** writes the whole file expanded instead, as `cjc
