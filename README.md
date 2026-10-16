@@ -14,8 +14,8 @@ From the Marketplace or [Open VSX](https://open-vsx.org): **Cangjie** by `ide4cj
 
 | Channel | Version | cjls inside |
 |---|---|---|
-| release | even minor (`0.2.x`) | the release this version pins (`.cjls-version`), the one it is tested with |
-| pre-release | odd minor (`0.3.<date>`) | cjls's `nightly-build`, rebuilt every night master moves |
+| release | cjls's minor (`0.5.x` for cjls `0.5`), a patch of its own | the release this version pins (`.cjls-version`), the one it is tested with |
+| pre-release | the next minor (`0.6.<date>`) | cjls's `nightly-build`, rebuilt every night master moves |
 
 VS Code's **Switch to Pre-Release Version** picks the channel.
 
