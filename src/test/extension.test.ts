@@ -78,6 +78,47 @@ suite('Cangjie', () => {
     }
   });
 
+  // A line and the words in it, as cjls's lexer takes its names and numbers (cjsyntax's
+  // `isIdentLike` and `number`). VS Code finds a word by language-configuration.json's
+  // `wordPattern` where it completes: as one types, it asks for completion only in a word.
+  const words: [string, string[]][] = [
+    ['fu', ['fu']],
+    ['xx_1', ['xx_1']],
+    ['`class`', ['`class`']],
+    ['变量', ['变量']],
+    ['नमस्ते', ['नमस्ते']],
+    ['x\u200dy', ['x\u200dy']],
+    ['$name', ['$name']],
+    ['0x1F', ['0x1F']],
+    ['1_000u16', ['1_000u16']],
+    ['3.14', ['3.14']],
+    ['1e-3f32', ['1e-3f32']],
+    ['0x1p-4', ['0x1p-4']],
+    ['a-1', ['a', '1']],
+    ['x.y', ['x', 'y']],
+    ['1..10', ['1', '10']],
+  ];
+  for (const [line, expected] of words) {
+    test(`the words of ${JSON.stringify(line)} are ${JSON.stringify(expected)}`, async () => {
+      // arrange
+      const doc = await vscode.workspace.openTextDocument({ language: 'cangjie', content: line });
+
+      // act: the word at a position inside each expected one, by the language's `wordPattern` as
+      // VS Code compiles it (not Ctrl+D's or a double click's, which go by `editor.wordSeparators`)
+      const found: string[] = [];
+      let from = 0;
+      for (const word of expected) {
+        const start = line.indexOf(word, from);
+        from = start + word.length;
+        const range = doc.getWordRangeAtPosition(new vscode.Position(0, start + Math.min(1, word.length - 1)));
+        found.push(range ? doc.getText(range) : '<none>');
+      }
+
+      // assert
+      assert.deepEqual(found, expected);
+    });
+  }
+
   test('cjls: Expand macro is in the palette of a Cangjie editor whose server expands macros', () => {
     // act
     const contributes = vscode.extensions.getExtension('ide4cj.cangjie')!.packageJSON.contributes;
