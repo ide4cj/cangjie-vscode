@@ -1,8 +1,8 @@
 name: Nightly
 
 # The pre-release channel (cjls's D32): every night cjls's nightly or this repository's master moved,
-# VSIXes with the nightly inside, versioned 0.<stable minor + 1>.<date> — an odd minor, above
-# every stable release until the next.
+# VSIXes with the nightly inside, versioned <the stable minor + 1>.<date>: above every stable release
+# until the next minor's, as the nightly is ahead of the pinned cjls (cjls's D132).
 on:
   schedule:
     - cron: "0 4 * * *" # an hour after cjls's nightly

@@ -1,7 +1,8 @@
 name: Bump
 
-# A stable release (cjls's D32): once Renovate's PR moves .cjls-version, or by hand. `cog bump`
-# from the conventional commits, its minor made even: odd minors are the pre-releases'.
+# A stable release (cjls's D32): once Renovate's PR moves .cjls-version, or by hand. Its version is
+# the pinned cjls's minor with a patch of its own (cjls's D132), when a commit since the last
+# release is one `cog bump --auto` would release.
 on:
   push:
     branches: [master]
@@ -43,17 +44,17 @@ jobs:
       - uses: cocogitto/cocogitto-action@v4
         with:
           command: check
+      - id: next
+        uses: ide4cj/.github/actions/client-version@master
       - id: bump
+        if: steps.next.outputs.version
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
         run: |
-          if [ -z "$(cat .cjls-version)" ]; then echo "::error::.cjls-version pins no cjls release"; exit 1; fi
-          next=$(cog bump --auto --dry-run 2>/dev/null || true)
-          if [ -z "$next" ]; then echo "::notice::nothing to release"; exit 0; fi
-          IFS=. read -r major minor patch <<< "${next#v}"
-          if [ $((minor % 2)) = 1 ]; then minor=$((minor + 1)); patch=0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cog bump --version "$major.$minor.$patch"
-          echo "version=$major.$minor.$patch" >> "$GITHUB_OUTPUT"
+          cog bump --version "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
   release:
     needs: bump

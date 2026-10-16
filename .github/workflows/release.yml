@@ -1,9 +1,9 @@
 name: Release
 
 # Platform VSIXes with cjls inside, and a universal one without it (the server from
-# `cjls.server.path` or PATH): stable, an even minor, with the pinned cjls; pre-release, an odd
-# minor, with the nightly (cjls's D32). Published to the Marketplace and Open VSX when their tokens
-# are set, and to this repository's releases always.
+# `cjls.server.path` or PATH): stable, on the pinned cjls's minor, with that cjls; pre-release, a
+# minor ahead, with the nightly (cjls's D32, D132). Published to the Marketplace and Open VSX when
+# their tokens are set, and to this repository's releases always.
 on:
   workflow_call:
     inputs:
@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The extension's version (an even minor for stable, odd for pre-release)
+        description: The extension's version (the pinned cjls's minor for stable, the next for pre-release)
         required: true
       channel:
         type: choice
