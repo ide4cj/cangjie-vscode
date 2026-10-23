@@ -37,6 +37,15 @@ export class BinarySources implements vscode.Disposable {
     return this.pending;
   }
 
+  /** Reported roots after pending editor protection has been applied. */
+  async currentRoots(): Promise<readonly string[]> {
+    for (;;) {
+      const pending = this.pending;
+      await pending;
+      if (pending === this.pending) return this.roots.map((root) => root.toString());
+    }
+  }
+
   dispose(): void {
     this.listener.dispose();
   }

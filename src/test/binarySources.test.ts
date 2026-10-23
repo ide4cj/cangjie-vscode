@@ -9,6 +9,10 @@ import type { Api } from '../extension';
 suite('Binary sources', () => {
   test('the running client protects sources reported by cjls and clears a removed root', async function () {
     if (!process.env.CJLS_BIN) this.skip();
+    const api = await vscode.extensions.getExtension<Api>('ide4cj.cangjie')!.activate();
+    const client = api.client();
+    assert.ok(client);
+    if (!client.initializeResult?.capabilities.experimental?.binarySourceRoots) this.skip();
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'cjls-source-notification-'));
     const root = vscode.Uri.file(path.join(dir, 'lib sources'));
     const file = vscode.Uri.joinPath(root, 'lib.cj');
@@ -18,24 +22,30 @@ suite('Binary sources', () => {
     await vscode.workspace.fs.createDirectory(root);
     await vscode.workspace.fs.writeFile(file, new TextEncoder().encode('package lib\n'));
     await fs.writeFile(project, JSON.stringify({ modules: [], binaries: [{ name: 'lib', paths: [], sources: root.fsPath }] }));
-    const api = await vscode.extensions.getExtension<Api>('ide4cj.cangjie')!.activate();
-    assert.ok(api.client());
     const editor = await vscode.window.showTextDocument(file);
     async function canType(): Promise<boolean> {
+      assert.equal(vscode.window.activeTextEditor?.document.uri.toString(), file.toString());
       const before = editor.document.getText();
       await vscode.commands.executeCommand('type', { text: 'x' });
       const changed = editor.document.getText() !== before;
       if (changed) await vscode.commands.executeCommand('undo');
       return changed;
     }
-    async function untilTyping(allowed: boolean): Promise<void> {
-      while (await canType() !== allowed) await new Promise((resolve) => setTimeout(resolve, 100));
+    async function untilReported(present: boolean): Promise<void> {
+      while ((await api.binarySourceRoots()).includes(root.toString()) !== present) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     }
     try {
       await config.update('linkedProjects', [project], vscode.ConfigurationTarget.Workspace);
-      await untilTyping(false);
-      await config.update('linkedProjects', [], vscode.ConfigurationTarget.Workspace);
-      await untilTyping(true);
+      await untilReported(true);
+      assert.equal(await canType(), false);
+      await fs.writeFile(project, JSON.stringify({ modules: [], binaries: [] }));
+      await client.sendNotification('workspace/didChangeWatchedFiles', {
+        changes: [{ uri: vscode.Uri.file(project).toString(), type: 2 }],
+      });
+      await untilReported(false);
+      assert.equal(await canType(), true);
     } finally {
       await config.update('linkedProjects', previous, vscode.ConfigurationTarget.Workspace);
       await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');

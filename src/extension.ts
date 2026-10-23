@@ -21,6 +21,8 @@ export interface Api {
   client(): LanguageClient | undefined;
   /** Stops the server if it runs, and starts it again with the current settings. */
   restart(): Promise<void>;
+  /** Reported binary source roots after pending editor protection has been applied. */
+  binarySourceRoots(): Promise<readonly string[]>;
 }
 
 let client: LanguageClient | undefined;
@@ -54,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Api> {
   }
 
   await start(context);
-  return { client: () => client, restart };
+  return { client: () => client, restart, binarySourceRoots: async () => binarySources?.currentRoots() ?? [] };
 }
 
 export async function deactivate(): Promise<void> {
