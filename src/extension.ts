@@ -3,7 +3,7 @@
 // D79), gives it an output channel, and shows what `cjls/expandMacro` answers (expandMacro.ts).
 
 import * as vscode from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { LanguageClient, LanguageClientOptions, ServerOptions, State } from 'vscode-languageclient/node';
 import {
   EXPANDS_MACROS,
   ExpansionDocuments,
@@ -13,6 +13,7 @@ import {
   showMacroExpansion,
 } from './expandMacro';
 import { findServer } from './server';
+import { BINARY_SOURCE_ROOTS, BinarySourceRootsParams, BinarySources } from './binarySources';
 
 /** What the extension returns from `activate`, for its tests. */
 export interface Api {
@@ -24,13 +25,16 @@ export interface Api {
 
 let client: LanguageClient | undefined;
 let output: vscode.LogOutputChannel | undefined;
+let binarySources: BinarySources | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<Api> {
   output = vscode.window.createOutputChannel('cjls', { log: true });
   const expansions = new ExpansionDocuments();
+  binarySources = new BinarySources((message) => output?.error(message));
   context.subscriptions.push(
     output,
     expansions,
+    binarySources,
     vscode.workspace.registerTextDocumentContentProvider(SCHEME, expansions),
     vscode.commands.registerCommand('cjls.restartServer', restart),
     vscode.commands.registerCommand('cjls.showOutput', () => output?.show()),
@@ -92,6 +96,14 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
     initializationOptions: () => toJson(vscode.workspace.getConfiguration('cjls')),
   };
   const started = new LanguageClient('cjls', 'cjls', serverOptions, clientOptions);
+  // Register before start: roots may arrive immediately after initialized.
+  const rootsSubscription = started.onNotification(BINARY_SOURCE_ROOTS, (params: BinarySourceRootsParams) =>
+    binarySources?.update(params),
+  );
+  context.subscriptions.push(rootsSubscription);
+  started.onDidChangeState((event) => {
+    if (event.newState !== State.Running) void binarySources?.update({ roots: [] });
+  });
   try {
     await started.start();
     client = started;
@@ -109,6 +121,7 @@ async function stop(): Promise<void> {
   if (running) {
     await running.stop();
   }
+  await binarySources?.update({ roots: [] });
 }
 
 /** A configuration as plain JSON: `WorkspaceConfiguration` carries its methods besides the values. */
