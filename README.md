@@ -86,6 +86,18 @@ every night (the pre-release). Publishing needs the secrets `VSCE_PAT` (Marketpl
 `ide4cj`) and `OVSX_PAT` (Open VSX, namespace `ide4cj`); without them the VSIXes go to the GitHub
 release alone.
 
+Tests follow the shared [AAA and cleanup conventions](https://github.com/ide4cj/.github/blob/master/CONTRIBUTING.md#tests).
+
 ## License
 
 MIT or Apache-2.0, as cjls.
+
+## Binary library sources
+
+With a cjls supporting `cjls/binarySourceRoots`, SDK std sources and other sources
+attached to binary libraries become read-only for the session when their editor
+is active, including an editor already active when the roots arrive. Source path
+dependencies remain editable. The extension changes neither file permissions nor
+workspace settings. Changes to roots and server restarts are reconciled as each
+editor becomes active; VS Code's session command only targets the active editor.
+Other configured readonly rules still apply when this protection is removed.
