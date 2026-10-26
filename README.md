@@ -86,6 +86,8 @@ every night (the pre-release). Publishing needs the secrets `VSCE_PAT` (Marketpl
 `ide4cj`) and `OVSX_PAT` (Open VSX, namespace `ide4cj`); without them the VSIXes go to the GitHub
 release alone.
 
+Tests follow the shared [AAA and cleanup conventions](https://github.com/ide4cj/.github/blob/master/CONTRIBUTING.md#tests).
+
 ## License
 
 MIT or Apache-2.0, as cjls.

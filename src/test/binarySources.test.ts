@@ -8,6 +8,7 @@ import type { Api } from '../extension';
 
 suite('Binary sources', () => {
   test('the running client protects sources reported by cjls and clears a removed root', async function () {
+    // arrange
     if (!process.env.CJLS_BIN) this.skip();
     const api = await vscode.extensions.getExtension<Api>('ide4cj.cangjie')!.activate();
     const client = api.client();
@@ -37,15 +38,24 @@ suite('Binary sources', () => {
       }
     }
     try {
+      // act: the server reports the linked binary's sources
       await config.update('linkedProjects', [project], vscode.ConfigurationTarget.Workspace);
       await untilReported(true);
-      assert.equal(await canType(), false);
+      const protectedCanType = await canType();
+
+      // assert
+      assert.equal(protectedCanType, false);
+
+      // act: removing the binary replaces the roots and restores editing
       await fs.writeFile(project, JSON.stringify({ modules: [], binaries: [] }));
       await client.sendNotification('workspace/didChangeWatchedFiles', {
         changes: [{ uri: vscode.Uri.file(project).toString(), type: 2 }],
       });
       await untilReported(false);
-      assert.equal(await canType(), true);
+      const restoredCanType = await canType();
+
+      // assert
+      assert.equal(restoredCanType, true);
     } finally {
       await config.update('linkedProjects', previous, vscode.ConfigurationTarget.Workspace);
       await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
@@ -53,6 +63,7 @@ suite('Binary sources', () => {
     }
   });
   test('session readonly prevents typing and roots replacement restores editing', async () => {
+    // arrange
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'cjls-readonly-'));
     const root = vscode.Uri.file(path.join(dir, 'std sources #1'));
     const file = vscode.Uri.joinPath(root, 'core.cj');
@@ -65,17 +76,29 @@ suite('Binary sources', () => {
         await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode('package example\n'));
       }
       const editor = await vscode.window.showTextDocument(file);
+
+      // act
       await sources.update({ roots: [root.toString()] });
       await vscode.commands.executeCommand('type', { text: 'x' });
+
+      // assert
       assert.equal(editor.document.getText(), 'package example\n');
+
+      // act: a sibling directory is outside the reported root
       const other = await vscode.window.showTextDocument(sibling);
       await sources.apply();
       await vscode.commands.executeCommand('type', { text: 'x' });
+
+      // assert
       assert.ok(other.document.getText().includes('x'));
+
+      // act: replacing the roots restores editing in the original file
       await vscode.window.showTextDocument(file);
       await sources.apply();
       await sources.update({ roots: [] });
       await vscode.commands.executeCommand('type', { text: 'x' });
+
+      // assert
       assert.ok(editor.document.getText().includes('x'));
       assert.deepEqual(errors, []);
     } finally {
