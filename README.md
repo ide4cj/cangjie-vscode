@@ -30,8 +30,16 @@ In this order:
 | Setting | |
 |---|---|
 | `cjls.server.path` | the binary to run |
-| `cjls.server.extraEnv` | its environment: `{ "CJLS_LOG_LEVEL": "DEBUG" }` |
+| `cjls.server.extraEnv` | its environment: `{ "CJLS_LOG_LEVEL": "DEBUG" }`; values expand `$VAR`, `${VAR}` and a leading `~` from VS Code's inherited environment |
 | `cjls.trace.server` | `messages` or `verbose` traces the protocol into the `cjls` output channel |
+
+Expansion in `extraEnv` happens once, before starting the server. For example,
+`{ "CANGJIE_STDX_PATH": "$HOME/.cjpm/toolchains/default/linux_x86_64_cjnative/static/stdx" }`
+uses the home directory inherited by VS Code. Entries cannot refer to other entries
+in `extraEnv`; inserted values are not expanded again. Unknown variables stay literal
+and produce a warning in the cjls output channel. `~` uses `HOME`, falling back to
+`USERPROFILE`; `~user` and other shell expressions remain literal. Changes restart
+the server.
 
 Commands: **cjls: Restart the language server**, **cjls: Show the language server's log**. A
 change to `cjls.server.*` restarts it.

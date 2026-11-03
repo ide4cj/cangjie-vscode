@@ -121,7 +121,7 @@
             "type": "string"
           },
           "default": {},
-          "markdownDescription": "Environment variables for the server, such as `{ \"CJLS_LOG_LEVEL\": \"DEBUG\" }`."
+          "markdownDescription": "Environment variables for the server. Values expand `$VAR`, `${VAR}` and a leading `~` once against VS Code's inherited environment; references to other extraEnv entries are not resolved. Missing variables stay literal and are logged. Changes restart the server. For example, `{ \"CJLS_LOG_LEVEL\": \"DEBUG\" }`."
         },
         "cjls.trace.server": {
           "type": "string",
