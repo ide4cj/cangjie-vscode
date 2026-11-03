@@ -30,8 +30,27 @@ In this order:
 | Setting | |
 |---|---|
 | `cjls.server.path` | the binary to run |
-| `cjls.server.extraEnv` | its environment: `{ "CJLS_LOG_LEVEL": "DEBUG" }` |
+| `cjls.server.extraEnv` | its environment: `{ "CJLS_LOG_LEVEL": "DEBUG" }`; values expand `$VAR`, `${VAR}` and a leading `~` |
 | `cjls.trace.server` | `messages` or `verbose` traces the protocol into the `cjls` output channel |
+
+Values in `extraEnv` expand `$VAR` and `${VAR}` from other `extraEnv` entries first,
+then from VS Code's inherited environment. Entry order does not matter. For example:
+
+```json
+{
+  "cjls.server.extraEnv": {
+    "CANGJIE_STDX_PATH": "${SDK}/static/stdx",
+    "SDK": "$HOME/.cjpm/toolchains/default/linux_x86_64_cjnative"
+  }
+}
+```
+
+A self-reference such as `"PATH": "${PATH}:/tools"` uses the inherited value.
+Inherited values are inserted literally, without further expansion. A leading `~`
+uses inherited `HOME`, falling back to `USERPROFILE`; `~user` and other shell
+expressions remain literal. Unknown variables stay literal; entries that depend on
+cyclic references keep their configured values unchanged. Both produce warnings
+in the cjls output channel without logging values.
 
 Commands: **cjls: Restart the language server**, **cjls: Show the language server's log**. A
 change to `cjls.server.*` restarts it.

@@ -104,8 +104,14 @@ suite('Binary sources', () => {
     } finally {
       await sources.update({ roots: [] });
       sources.dispose();
-      await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
-      await fs.rm(dir, { recursive: true, force: true });
+      for (const uri of [file, sibling]) {
+        if (vscode.workspace.textDocuments.some((doc) => !doc.isClosed && doc.uri.toString() === uri.toString())) {
+          await vscode.window.showTextDocument(uri);
+          await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+        }
+      }
+      // Windows may release editor and watcher handles after the close command completes.
+      await fs.rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 });

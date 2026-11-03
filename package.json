@@ -121,7 +121,7 @@
             "type": "string"
           },
           "default": {},
-          "markdownDescription": "Environment variables for the server, such as `{ \"CJLS_LOG_LEVEL\": \"DEBUG\" }`."
+          "markdownDescription": "Environment variables for the server. Values expand `$VAR` and `${VAR}` from other extraEnv entries, then VS Code's inherited environment, regardless of entry order. Self-references use inherited values, which are not expanded again. A leading `~` uses inherited `HOME` or `USERPROFILE`. Missing references stay literal; cyclic references leave affected entries unchanged. Warnings omit values. Changes restart the server. For example, `{ \"CJLS_LOG_LEVEL\": \"DEBUG\" }`."
         },
         "cjls.trace.server": {
           "type": "string",

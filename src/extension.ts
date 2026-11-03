@@ -13,6 +13,7 @@ import {
   showMacroExpansion,
 } from './expandMacro';
 import { findServer } from './server';
+import { expandExtraEnv } from './environment';
 import { BINARY_SOURCE_ROOTS, BinarySourceRootsParams, BinarySources } from './binarySources';
 
 /** What the extension returns from `activate`, for its tests. */
@@ -82,7 +83,7 @@ async function start(context: vscode.ExtensionContext): Promise<void> {
   const extraEnv = vscode.workspace.getConfiguration('cjls').get<Record<string, string>>('server.extraEnv') ?? {};
   const serverOptions: ServerOptions = {
     command: server.path,
-    options: { env: { ...process.env, ...extraEnv } },
+    options: { env: expandExtraEnv(extraEnv, process.env, (message) => output?.warn(message)) },
   };
   const clientOptions: LanguageClientOptions = {
     // `*.cj.macrocall` is Cangjie too (package.json), so the expanded files the server writes
